@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Jekyll v3.8.6">
+  <title>Skener bločkov</title>
+
+  <link rel="canonical" href="https://qr.uvaaccess.eu/">
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" href="/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+  <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+  <link rel="manifest" href="/docs/4.4/assets/img/favicons/manifest.json">
+  <link rel="mask-icon" href="/docs/4.4/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
+  <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon.ico">
+  <meta name="msapplication-config" content="/docs/4.4/assets/img/favicons/browserconfig.xml">
+  <meta name="theme-color" content="#563d7c">
+
+
+  <style>
+    .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+  <!-- Custom styles for this template -->
+  <link href="css/sticky-footer-navbar.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column h-100">
+  <header>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">Menu</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="index.html">Skenovať<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="about.html">O projekte</a>
+          </li>
+        </ul>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- Begin page content -->
+  <main role="main" class="flex-shrink-0">
+    <div id="init" class="container">
+      <h1 class="mt-5">Inicializácia</h1>
+      <div class="form-group">
+        <label for="cmpId">Identifikátor spoločnosti</label>
+        <input type="text" class="form-control" id="cmpId" aria-describedby="idHelp">
+        <small id="idHelp" class="form-text text-muted">Pomenuj si túto skupinu bločkov, tak aby ju bolo možné neskôr identifikovať.</small>
+      </div>
+    </div>
+    <!-- Content here -->
+    </div>
+    <div id="scan" class="container" style="display:none">
+      <div id="loadingMessage">Unable to access video stream (please make sure you have a webcam enabled)</div>
+      <canvas id="canvas" hidden class="mx-auto"></canvas>
+      <div id="output" hidden>
+        <div id="outputMessage">No QR code detected.</div>
+      </div>
+      <div id="alerts">
+      </div>
+    </div>
+    <div id="processData" class="container" style="display:none">
+      <h2>Export údajov</h2>
+      <h4>Počet úspešne načítaných bločkov: <span id="pocetok"></span></h4>
+      <h4>Počet bločkov ktorých dáta sa nepodarilo načítať: <span id="pocetnok">0</span></h4>
+      <p>
+        <button id="bZobrazBezDat" style="display:none" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#blockynok" aria-expanded="false" aria-controls="blockynok">
+          Zobrazi bločky bez dát
+        </button>
+      </p>
+      <div class="collapse" id="blockynok">
+        <div class="card card-body" id="zoznamBlockyNok">
+        </div>
+      </div>
+      <form>
+      <div class="form-group row">
+        <label for="formatVystupu" class="col-sm-2 col-form-label">Formát výstupu</label>
+        <div class="col-sm-10">
+          <select class="form-control" id="formatVystupu">
+            <option value="ks">MRP K/S</option>
+          </select>
+        </div>
+      </div>
+    </form>
+
+    </div>
+  </main>
+
+
+
+  <!-- footer nav bar -->
+  <footer class="footer mt-auto py-3">
+    <div class="container">
+      <button id="bstep2" type="button" class="btn btn-primary" style="display:none" onclick="setCmpStorage()">Zahájiť skenovanie</button>
+      <button id="bstep3" type="button" class="btn btn-primary" style="display:none" onclick="processData()">Ukončiť skenovanie</button>
+      <button id="bretry" type="button" class="btn btn-primary" style="display:none" onclick="retryFailed()">Opakovať neúspešné</button>
+      <button id="bstep4" type="button" class="btn btn-primary" style="display:none" onclick="exportData()">Exportovať</button>
+      <button id="bdelmem" type="button" class="btn btn-primary" style="display:none" onclick="delStorage()">Vyčistiť spracované položky</button>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script src="js/jsQR.js"></script>
+  <script src="js/idb.js"></script>
+
+
+  <script>
+    'use strict'
+    var oldCode = "";
+    var cmpId = "";
+    var video;
+    var canvasElement;
+    var canvas;
+    var loadingMessage;
+    var outputContainer;
+    var outputMessage;
+    var outputData;
+    var idbApp;
+
+    function preFlightChecks() {
+      if (!('indexedDB' in window)) {
+        console.warn('IndexedDB not supported')
+        return 1;
+      }
+      return 0;
+    }
+
+
+    function setCmpStorage() {
+      cmpId = document.getElementById("cmpId").value
+      //get version
+
+      idbApp = (function() {
+
+        'use strict';
+
+        const dbName = 'qrscan'
+        const storeName = 'resolved'
+        const storeFName = 'failed'
+        //versions start at 1
+        const version = 2
+
+        const dbPromise = idb.open(dbName, version, function(upgradeDb) {
+          if (upgradeDb.oldVersion < version) {
+
+            if (!upgradeDb.objectStoreNames.contains(storeName)) {
+              console.log('Creating object store ' + storeName)
+              const RStore = upgradeDb.createObjectStore(storeName, {
+                keyPath: 'id'
+              })
+              RStore.createIndex('cmpId', 'cmpId')
+              RStore.createIndex('id', 'id', {
+                unique: true
+              })
+            }
+
+
+            if (!upgradeDb.objectStoreNames.contains(storeFName)) {
+              console.log('Creating object store ' + storeFName)
+              const FStore = upgradeDb.createObjectStore(storeFName, {
+                keyPath: 'id'
+              })
+              FStore.createIndex('cmpId', 'cmpId')
+              FStore.createIndex('id', 'id', {
+                unique: true
+              })
+
+            }
+
+          console.log('...done');
+
+          }
+        })
+
+        async function saveResolved(id, retData) {
+          dbPromise.then(function(db) {
+            const tx = db.transaction('resolved', 'readwrite')
+            const store = tx.objectStore('resolved')
+
+            let items = [{
+              id: id,
+              cmpId: cmpId,
+              data: retData
+            }];
+            return Promise.all(items.map(function(item) {
+              console.log('Adding item: ', item);
+              return store.add(item);
+            })).catch(function(e) {
+              tx.abort();
+              console.log(e);
+            }).then(function() {
+              console.log('Item added successfully!');
+            });
+          });
+        }
+
+        async function saveFailed(id) {
+          dbPromise.then(function(db) {
+            const tx = db.transaction('failed', 'readwrite')
+            const store = tx.objectStore('failed')
+
+            let items = [{
+              id: id,
+              cmpId: cmpId,
+              data: new Date()
+            }];
+            return Promise.all(items.map(function(item) {
+              console.log('Adding item: ', item);
+              return store.add(item);
+            })).catch(function(e) {
+              tx.abort();
+              console.log(e);
+            }).then(function() {
+              console.log('Item added successfully!');
+            });
+          });
+        }
+
+        function showCardinality(key,category){
+          return dbPromise.then(function(db) {
+            let tx = db.transaction(category, 'readonly');
+            let store = tx.objectStore(category);
+            let index = store.index('cmpId');
+            let request = index.count(key);
+            request.onsuccess = function() {
+              if (request.result !== undefined) {
+                console.log("Data", request.result);
+              } else {
+                console.log("No such data");
+              }
+            }
+            return request;
+          });
+        }
+
+        function getByName(key,category) {
+          return dbPromise.then(function(db) {
+            let tx = db.transaction(category, 'readonly');
+            let store = tx.objectStore(category);
+            let index = store.index('cmpId');
+            let request = index.getAll(key);
+            request.onsuccess = function() {
+              if (request.result !== undefined) {
+                console.log("Data", request.result);
+              } else {
+                console.log("No such data");
+              }
+            }
+            return request;
+          });
+        }
+
+        function displayByName(category) {
+           if (cmpId === '' || category ==='') {return;}
+           var s = '';
+           getByName(cmpId,category).then(function(object) {
+             if (!object) {return;}
+
+             s += '<p>';
+             for (var field in object) {
+               if(category == 'failed'){
+                 s += 'UID: ' + object[field].data.receiptId + '<br/>';
+               }else if(category == 'resolved'){
+                 s += 'UID: ' + object[field].data.receiptId + ' Suma: ' + object[field].data.totalPrice + '<br/>';
+               }
+             }
+             s += '</p>';
+
+           }).then(function() {
+             if (category == 'resolved'){
+               if (s === '') {s = 'Neboli načítané bločky.';}
+               document.getElementById('processData').innerHTML = s;
+             }else if (category == 'failed'){
+               if (s === '') {s = 'Všetky bločky sa podarilo úspešne načítať.';}
+               document.getElementById('zoznamBlockyNok').innerHTML = s;
+             }
+           });
+         }
+
+         function generateMRPKS(){
+           if (cmpId === '') {return;}
+           var s = '';
+           return getByName(cmpId,'resolved').then(function(object) {
+             if (!object) {return;}
+             for (var field in object) {
+
+                 s += `
+                 <CashVoucher>
+                 <DocumentNumber></DocumentNumber>
+                 <IssueDate>` + getDate(object[field].data.issueDate) + `</IssueDate>
+                 <CurrencyCode>EUR</CurrencyCode>
+                 <ValuesWithTax>T</ValuesWithTax>
+                 `
+                 if (object[field].data.type == "PD") {
+                   if(object[field].data.freeTaxAmount != null){
+                     s+= `<ZeroTaxRateAmount>` + object[field].data.freeTaxAmount + `</ZeroTaxRateAmount>
+                     `
+                   }
+                   if(object[field].data.taxBaseReduced != null){
+                     s+= `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
+                     `
+                   }
+                   if(object[field].data.taxBaseBasic != null){
+                     s+= `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
+                     `
+                   }
+                   if(object[field].data.vatAmountReduced != null){
+                     s+= `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
+                     `
+                    }
+                   if(object[field].data.vatAmountBasic != null){
+                     s+= `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
+                     `
+                   }
+                   if(object[field].data.issueDate != null){
+                    s+= `<TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>
+                    `
+                   }
+                 }
+                 else if (object[field].data.type == "UF") {
+                    if(object[field].data.totalPrice != null){
+                        s+= `<ZeroTaxRateAmount>` + object[field].data.totalPrice + `</ZeroTaxRateAmount>
+                        `
+                      }
+                 }
+                s+= `
+                <RoundingAmount></RoundingAmount>
+                <TotalWithTaxCurr>0.00</TotalWithTaxCurr>
+                <TotalWeight>0.000000</TotalWeight>
+                <VatRegime>0</VatRegime>
+                <VatCountry>SK</VatCountry>
+                <CashVoucherType>V</CashVoucherType>
+                <CashVoucherSubType>0</CashVoucherSubType>
+                <CalcParams>UPDP=3;TRU=0.01;TRM=0;TRD=0;TRDCA=0;VATFRB=1</CalcParams>
+                <Company>
+                <CompanyId>`+ object[field].data.ico+`</CompanyId>
+                <Name>`+ object[field].data.organization.name+`</Name>
+                <Street>`+ object[field].data.organization.streetName +` `+ object[field].data.organization.propertyRegistrationNumber +`</Street>
+                <City>`+ object[field].data.organization.municipality +`</City>
+                <Country>`+ object[field].data.organization.country+`</Country>
+                <ZipCode>`+ object[field].data.organization.postalCode+`</ZipCode>
+                <VatNumber>`+ object[field].data.organization.dic+`</VatNumber>
+                `
+
+                if(object[field].data.organization.icDph != null){
+                  s+= `<VatNumberSK>`+ object[field].data.organization.icDph+`</VatNumberSK>
+                  `
+                }
+                s+= `</Company>
+                <Items>
+      `
+                let polozky = object[field].data.items
+                if(polozky && polozky.length == 1 ){
+                   for (let item in polozky){
+                      s+= `
+                      <Item>
+                              <Description>` + polozky[item].name + `</Description>
+                                <Quantity>` + polozky[item].quantity + `</Quantity>
+                                <TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
+                                `
+                                  s+= `<UnitPrice>` + (polozky[item].price/polozky[item].quantity).toFixed(3) + `</UnitPrice>
+                                  <RowSumType>1</RowSumType>
+                                  <RowType>1</RowType>
+                              </Item>`
+                   }
+                } else if(polozky && polozky.length > 1){
+                    polozky.forEach(function(item){
+                      s+= `
+                      <Item>
+                              <Description>` + item.name + `</Description>
+                                <Quantity>` + item.quantity + `</Quantity>
+                                <TaxPercent>` + item.vatRate + `</TaxPercent>
+                                  <UnitPrice>` + (item.price/item.quantity).toFixed(3) + `</UnitPrice>
+                                  <RowSumType>1</RowSumType>
+                                  <RowType>1</RowType>
+                            </Item>
+                            `
+                    })
+               }else if (object[field].data.type == "UF"){
+                      s+= `
+                      <Item>
+                      <Description>` + object[field].data.invoiceNumber + `</Description>
+                        <Quantity>1.000000</Quantity>
+                        <TaxPercent>0.00</TaxPercent>
+                        <TaxAmount>0.000000</TaxAmount>
+                        <DiscountPercent>0.00</DiscountPercent>
+                        <UnitDiscount>0.000000</UnitDiscount>
+                        <StockCardNumber>0.00</StockCardNumber>
+                        <UnitPrice>` + object[field].data.totalPrice + `</UnitPrice>
+                      <RowSumType>1</RowSumType>
+                      <RowType>1</RowType>
+                </Item>
+                `
+               }
+
+
+            s+= `
+            </Items>
+              </CashVoucher>
+              `
+             }
+             return s
+           })
+         }
+
+         function getDate(data){
+           let dateItems=data.split(' ')
+           let datePart = dateItems[0].split('.')
+           return datePart[2] + '-' + datePart[1] + '-' + datePart[0]
+
+         }
+
+         function cleanStorage(category) {
+           return dbPromise.then(function(db) {
+             let tx = db.transaction(category, 'readwrite');
+             let store = tx.objectStore(category);
+             let request = store.clear();
+             request.onsuccess = function() {
+                 console.log("Data type "+ category +" pre identifikator " + cmpId +" boli ostranene.");
+             }
+             return request;
+           });
+         }
+
+        return {
+          dbPromise: (dbPromise),
+          saveResolved: (saveResolved),
+          saveFailed: (saveFailed),
+          getByName: (getByName),
+          displayByName: (displayByName),
+          showCardinality: (showCardinality),
+          cleanStorage: (cleanStorage),
+          generateMRPKS: (generateMRPKS)
+        };
+      })(); //end of app
+      beginScan()
+    }
+
+    function delStorage(){
+        idbApp.cleanStorage('resolved').then(function() {
+          idbApp.cleanStorage('failed').then(function() {
+            //return to step1
+            $("#bdelmem").hide();
+            $("div#processData").hide();
+            $("#bstep4").hide();
+            $("#bstep2").show();
+            $("#init").show();
+          })
+        })
+    }
+
+    function processData() {
+      video.srcObject.getTracks().forEach(function(track) {
+        track.stop();
+      });
+      $("#scan").hide();
+      $("#bstep3").hide();
+      $("div#processData").show();
+      $("#bstep4").show();
+      idbApp.displayByName('failed');
+      idbApp.showCardinality(cmpId,'failed').then(function(cardinality) {
+          document.getElementById('pocetnok').innerHTML = cardinality;
+          if(cardinality>0){
+            $("#bZobrazBezDat").show()
+            $("#bretry").show()
+          }
+
+      });
+      idbApp.showCardinality(cmpId,'resolved').then(function(cardinality) {
+          document.getElementById('pocetok').innerHTML = cardinality;
+      });
+
+    }
+
+    function exportData(){
+
+        let exportType = $('#formatVystupu').val();
+
+        //v cykle prejdem naskenovane veci
+        switch(exportType) {
+          case 'ks':
+            idbApp.generateMRPKS().then(function(xmldata) {
+              let eD
+              eD = `<?xml version="1.0" encoding="UTF-8"?>
+              <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
+              <CashVouchers>`
+              eD += xmldata + ` </CashVouchers>
+              </MRPKSData>`
+              download('Blocky_' + cmpId + '.xml', eD)
+            });
+            break;
+          }
+          $("#bdelmem").show();
+    }
+
+      function download(filename, text) {
+        var pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        pom.setAttribute('download', filename);
+        pom.click();
+      }
+
+      function retryFailed(){
+        //get unresolved items a try to resolve them
+
+        idbApp.getByName(cmpId,'failed').then(function(object) {
+          if (!object) {return;}
+
+          for (var field in object) {
+             if(object[field].id !== null){
+               getReceiptData(object[field].id);
+            }
+          }
+          idbApp.displayByName('failed');
+          idbApp.showCardinality(cmpId,'failed').then(function(cardinality) {
+              document.getElementById('pocetnok').innerHTML = cardinality;
+              if(cardinality>0){
+                $("#bZobrazBezDat").show()
+                $("#bretry").show()
+              }
+
+          });
+          idbApp.showCardinality(cmpId,'resolved').then(function(cardinality) {
+              document.getElementById('pocetok').innerHTML = cardinality;
+          });
+
+      })
+    }
+
+
+    function beginScan() {
+
+      $("#init").hide();
+      $("#bstep2").hide();
+      $("#scan").show();
+      $("#bstep3").show();
+
+      video = document.createElement("video");
+      canvasElement = document.getElementById("canvas");
+      canvas = canvasElement.getContext("2d");
+      loadingMessage = document.getElementById("loadingMessage");
+      outputContainer = document.getElementById("output");
+      outputMessage = document.getElementById("outputMessage");
+      outputData = document.getElementById("outputData");
+
+      // Use facingMode: environment to attemt to get the front camera on phones
+      navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment"
+        }
+      }).then(function(stream) {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+        video.play();
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function drawLine(begin, end, color) {
+      canvas.beginPath();
+      canvas.moveTo(begin.x, begin.y);
+      canvas.lineTo(end.x, end.y);
+      canvas.lineWidth = 4;
+      canvas.strokeStyle = color;
+      canvas.stroke();
+    }
+
+    function tick() {
+      loadingMessage.innerText = "⌛ Loading video..."
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        canvasElement.hidden = false;
+        outputContainer.hidden = false;
+
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        var code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code && code.data.length > 2 && code.data != oldCode) {
+          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#00FF00");
+          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#00FF00");
+          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#00FF00");
+          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#00FF00");
+          outputMessage.hidden = true;
+          oldCode = code.data;
+          getReceiptData(code.data);
+
+        } else {
+          //outputData.parentElement.hidden = true;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function getReceiptData(id) {
+      var jqxhr = $.ajax({
+          method: "POST",
+          url: "https://ekasa.financnasprava.sk/mdu/api/v1/opd/receipt/find",
+          data: JSON.stringify({
+            receiptId: id
+          }),
+          dataType: "json",
+          crossDomain: "true",
+          contentType: "application/json;charset=utf-8",
+          cache: false
+        })
+        .done(function(retData) {
+          //// TODO: Neplatný bloček!
+
+          if (retData.returnValue == 0) {
+            var returnedData = retData.receipt;
+            $("div#alerts").html('<div class="alert alert-success" role="alert">Suma: ' + returnedData.totalPrice + '</div>')
+            window.setTimeout(function() {
+              $(".alert-success").fadeTo(500, 0).slideUp(500, function() {
+                $(this).remove();
+                outputMessage.hidden = false;
+
+              });
+            }, 2000);
+            idbApp.saveResolved(id, returnedData);
+
+          }
+
+        })
+        .fail(function() {
+          //nepodariosa ziskat data
+          $("div#alerts").html('<div class="alert alert-warning" role="alert">Nebolo možné overiť platnosť bločku.</div>')
+          // Store
+          idbApp.saveFailed(id);
+
+
+        })
+
+    }
+
+
+
+
+
+    $(document).ready(function() {
+
+
+      if (preFlightChecks() > 0) {
+        //nepresli sme testami, nema vyznam pokracovat v inicializacii
+        return;
+      }
+
+      if ($("#init").is(":visible")) {
+        $("#bstep2").show();
+      }
+
+
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Jekyll v3.8.6">
+  <title>Sticky Footer Navbar Template · Bootstrap</title>
+
+  <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/sticky-footer-navbar/">
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" href="/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+  <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+  <link rel="manifest" href="/docs/4.4/assets/img/favicons/manifest.json">
+  <link rel="mask-icon" href="/docs/4.4/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
+  <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon.ico">
+  <meta name="msapplication-config" content="/docs/4.4/assets/img/favicons/browserconfig.xml">
+  <meta name="theme-color" content="#563d7c">
+  <link href="css/sticky-footer-navbar.css" rel="stylesheet">
+</head>
+
+<body class="d-flex flex-column h-100">
+  <header>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">Menu</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="index.html">Skenovať<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="about.html">O projekte</a>
+          </li>
+        </ul>
+
+      </div>
+    </nav>
+  </header>
+
+  <!-- Begin page content -->
+  <main role="main" class="flex-shrink-0">
+    <div id="init" class="container">
+      <h2 class="mt-5">COVID-19 nám zmenil plány</h2>
+      <blockquote class="blockquote text-center"">
+        <p class="mb-0">
+        Túto jednoduchú aplikáciu som napísal počas pár večerov pre polovičku a rozhodol som sa ju zverejniť
+        aby som prispel k zlepšeniu situácie, v týchto náročných časoch.
+      </p>
+      <footer class="blockquote-footer"><cite title="Source Title">Peter Vilhan</cite></footer>
+</blockquote>
+      <h2 class="mt-5">Funkcionalita</h2>
+        <p>Aplikácia umožňuje pomocou webkamery/telefónu načítať bločky na základe ich QR kódu a následne ich exportovať do formátu, z ktorého ich môžete načítať do svojho účtovného software.
+          Pre získanie dát bločku, aplikácie využíva rovnaký endpoint ako aplikácia Over doklad Financnej správy.
+        </p>
+              <p>
+      Aktuálne aplikácia podporuje export dokladov do:
+      <dl class="row">
+        <dt class="col-sm-2">MRP K/S XML v2.0</dt>
+        <dd class="col-sm-6">podľa http://faq.mrp.cz/faqcz/obrazky/jkimage/mrpks_xml_2_0_doc_pk.txt</dd>
+      </dl>
+        </p>
+
+
+  <h2 class="mt-5">Návod na použitie</h2>
+  <p>
+    V prvok kroku zadajte identifikator podla ktorého viete bločky idetifikovať. Napr. názov spoločnosti a mesiac? <br />
+    Príklad: AjetoFebruar
+    Následne kliknite na tlačidlo "Zahájiť skenovanie".
+    </p>
+    <p>
+      V ďalšom kroku už len nasnímajte bločky telefónom/webkamerou. Po úspešnom rozoznaní identifikátora bločku a získaní dát
+      bločku sa zobrazí jeho hodnota na pár sekúnd pod oknom s QR kodom a idete na ďalší bloček. Dáta sa ukladajú lokálne vo Vašom internetovom prehliadači.
+      </p>
+      <p>
+        Keď ste naskenovali posledný bloček, kliknite na tlačidlo ukončit skenovanie. Zobrazia sa štatistiky ako počet úspešne a neúspešne naskenovaných bločkov,
+        zvolíte si formát výstupu a kliknete na tlačidlo exportovať.
+        </p>
+          <p>
+            Po úspešnom exporte a uložení súboru s exportom na vasom zariadení, pokračujte vyčistením exportovaných dát z Vášho internetového prehliadača, kliknutím na tlačidlo "Vyčistiť spracované položky"
+              </p>
+
+    <h2 class="mt-5">Technické detaily</h2>
+      <p>Aplikácie je plne client-side a využíva:
+        <ul>
+          <li><a href="https://jquery.com/">jQuery</a></li>
+            <li> <a href="https://github.com/jakearchibald/idb">IndexedDB</a></li>
+              <li><a href="https://github.com/cozmo/jsQR">Knižnicu na rozoznávacie QR kódov</a></li>
+                <li><a href="https://getbootstrap.com/">Bootstrap framework</a> </li>
+                  </ul>
+      Som systémak, preto ten kód vypadá tak divoko :)
+
+      </p>
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+
+</html>

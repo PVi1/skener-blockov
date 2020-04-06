@@ -1,0 +1,48 @@
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+main > .container {
+  padding: 60px 15px 0;
+}
+
+.footer {
+  background-color: #f5f5f5;
+}
+
+.footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+code {
+  font-size: 80%;
+}
+
+#loadingMessage {
+     text-align: center;
+     padding: 40px;
+     background-color: #eee;
+   }
+
+   #canvas {
+     max-height: width: 80%;
+     max-width: 80%;
+
+   }
+
+   #output {
+     margin-top: 20px;
+     background: #eee;
+     padding: 10px;
+     padding-bottom: 0;
+   }
+
+   #output div {
+     padding-bottom: 10px;
+     word-wrap: break-word;
+   }
+
+   #noQRFound {
+     text-align: center;
+   }
