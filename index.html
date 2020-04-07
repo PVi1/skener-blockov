@@ -69,16 +69,19 @@
   <!-- Begin page content -->
   <main role="main" class="flex-shrink-0">
     <div id="init" class="container">
+
       <h1 class="mt-5">Inicializácia</h1>
       <div class="form-group">
         <label for="cmpId">Identifikátor spoločnosti</label>
-        <input type="text" class="form-control" id="cmpId" aria-describedby="idHelp">
+        <input type="text" class="form-control" id="cmpId" aria-describedby="idHelp" required>
         <small id="idHelp" class="form-text text-muted">Pomenuj si túto skupinu bločkov, tak aby ju bolo možné neskôr identifikovať.</small>
       </div>
+
     </div>
     <!-- Content here -->
     </div>
     <div id="scan" class="container" style="display:none">
+
       <div id="loadingMessage">Unable to access video stream (please make sure you have a webcam enabled)</div>
       <canvas id="canvas" hidden class="mx-auto"></canvas>
       <div id="output" hidden>
@@ -86,6 +89,7 @@
       </div>
       <div id="alerts">
       </div>
+      
     </div>
     <div id="processData" class="container" style="display:none">
       <h2>Export údajov</h2>
@@ -158,7 +162,11 @@
 
     function setCmpStorage() {
       cmpId = document.getElementById("cmpId").value
-      //get version
+
+      if(cmpId === "" ){
+        $("#cmpId").addClass('is-invalid')
+        return
+      }
 
       idbApp = (function() {
 
@@ -486,7 +494,6 @@
       $("#scan").hide();
       $("#bstep3").hide();
       $("div#processData").show();
-      $("#bstep4").show();
       idbApp.displayByName('failed');
       idbApp.showCardinality(cmpId,'failed').then(function(cardinality) {
           document.getElementById('pocetnok').innerHTML = cardinality;
@@ -498,6 +505,9 @@
       });
       idbApp.showCardinality(cmpId,'resolved').then(function(cardinality) {
           document.getElementById('pocetok').innerHTML = cardinality;
+            if(cardinality>0){
+              $("#bstep4").show();
+            }
       });
 
     }
@@ -682,6 +692,11 @@
         $("#bstep2").show();
       }
 
+      $('#cmpId').keypress(function (e) {
+        if (e.which == 13) {
+          setCmpStorage()
+        }
+      });
 
     });
   </script>
