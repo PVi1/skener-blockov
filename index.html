@@ -89,7 +89,7 @@
       </div>
       <div id="alerts">
       </div>
-      
+
     </div>
     <div id="processData" class="container" style="display:none">
       <h2>Export údajov</h2>
@@ -150,6 +150,7 @@
     var outputMessage;
     var outputData;
     var idbApp;
+    var a;
 
     function preFlightChecks() {
       if (!('indexedDB' in window)) {
@@ -159,6 +160,19 @@
       return 0;
     }
 
+    function beep(vol, freq, duration){
+      let v
+      let u
+      v=a.createOscillator()
+      u=a.createGain()
+      v.connect(u)
+      v.frequency.value=freq
+      v.type="square"
+      u.connect(a.destination)
+      u.gain.value=vol*0.01
+      v.start(a.currentTime)
+      v.stop(a.currentTime+duration*0.001)
+    }
 
     function setCmpStorage() {
       cmpId = document.getElementById("cmpId").value
@@ -657,10 +671,10 @@
               $(".alert-success").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
                 outputMessage.hidden = false;
-
               });
             }, 2000);
             idbApp.saveResolved(id, returnedData);
+            beep(50, 600, 100);
 
           }
 
@@ -670,7 +684,6 @@
           $("div#alerts").html('<div class="alert alert-warning" role="alert">Nebolo možné overiť platnosť bločku.</div>')
           // Store
           idbApp.saveFailed(id);
-
 
         })
 
@@ -697,6 +710,9 @@
           setCmpStorage()
         }
       });
+
+     a = new AudioContext() // browsers limit the number of concurrent audio contexts, so you better re-use'em
+
 
     });
   </script>
