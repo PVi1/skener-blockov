@@ -105,15 +105,15 @@
         </div>
       </div>
       <form>
-      <div class="form-group row">
-        <label for="formatVystupu" class="col-sm-2 col-form-label">Formát výstupu</label>
-        <div class="col-sm-10">
-          <select class="form-control" id="formatVystupu">
-            <option value="ks">MRP K/S</option>
-          </select>
+        <div class="form-group row">
+          <label for="formatVystupu" class="col-sm-2 col-form-label">Formát výstupu</label>
+          <div class="col-sm-10">
+            <select class="form-control" id="formatVystupu">
+              <option value="ks">MRP K/S</option>
+            </select>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
 
     </div>
   </main>
@@ -160,24 +160,24 @@
       return 0;
     }
 
-    function beep(vol, freq, duration){
+    function beep(vol, freq, duration) {
       let v
       let u
-      v=a.createOscillator()
-      u=a.createGain()
+      v = a.createOscillator()
+      u = a.createGain()
       v.connect(u)
-      v.frequency.value=freq
-      v.type="square"
+      v.frequency.value = freq
+      v.type = "square"
       u.connect(a.destination)
-      u.gain.value=vol*0.01
+      u.gain.value = vol * 0.01
       v.start(a.currentTime)
-      v.stop(a.currentTime+duration*0.001)
+      v.stop(a.currentTime + duration * 0.001)
     }
 
     function setCmpStorage() {
       cmpId = document.getElementById("cmpId").value
 
-      if(cmpId === "" ){
+      if (cmpId === "") {
         $("#cmpId").addClass('is-invalid')
         return
       }
@@ -190,7 +190,7 @@
         const storeName = 'resolved'
         const storeFName = 'failed'
         //versions start at 1
-        const version = 2
+        const version = 3
 
         const dbPromise = idb.open(dbName, version, function(upgradeDb) {
           if (upgradeDb.oldVersion < version) {
@@ -201,6 +201,7 @@
                 keyPath: 'id'
               })
               RStore.createIndex('cmpId', 'cmpId')
+              RStore.createIndex('cmpIdissueDate', ['cmpId', 'issueDate'])
               RStore.createIndex('id', 'id', {
                 unique: true
               })
@@ -213,18 +214,19 @@
                 keyPath: 'id'
               })
               FStore.createIndex('cmpId', 'cmpId')
+              FStore.createIndex('cmpIdissueDate', ['cmpId', 'issueDate'])
               FStore.createIndex('id', 'id', {
                 unique: true
               })
 
             }
 
-          console.log('...done');
+            console.log('...done');
 
           }
         })
 
-        async function saveResolved(id, retData) {
+        async function saveResolved(id, retData, issueDate) {
           dbPromise.then(function(db) {
             const tx = db.transaction('resolved', 'readwrite')
             const store = tx.objectStore('resolved')
@@ -232,6 +234,7 @@
             let items = [{
               id: id,
               cmpId: cmpId,
+              issueDate: issueDate,
               data: retData
             }];
             return Promise.all(items.map(function(item) {
@@ -268,7 +271,7 @@
           });
         }
 
-        function showCardinality(key,category){
+        function showCardinality(key, category) {
           return dbPromise.then(function(db) {
             let tx = db.transaction(category, 'readonly');
             let store = tx.objectStore(category);
@@ -285,16 +288,14 @@
           });
         }
 
-        function getByName(key,category) {
+        function getByName(key, category) {
           return dbPromise.then(function(db) {
             let tx = db.transaction(category, 'readonly');
             let store = tx.objectStore(category);
             let index = store.index('cmpId');
             let request = index.getAll(key);
             request.onsuccess = function() {
-              if (request.result !== undefined) {
-                console.log("Data", request.result);
-              } else {
+              if (request.result == undefined) {
                 console.log("No such data");
               }
             }
@@ -303,79 +304,99 @@
         }
 
         function displayByName(category) {
-           if (cmpId === '' || category ==='') {return;}
-           var s = '';
-           getByName(cmpId,category).then(function(object) {
-             if (!object) {return;}
+          if (cmpId === '' || category === '') {
+            return;
+          }
+          var s = '';
+          getByName(cmpId, category).then(function(object) {
+            if (!object) {
+              return;
+            }
 
-             s += '<p>';
-             for (var field in object) {
-               if(category == 'failed'){
-                 s += 'UID: ' + object[field].data.receiptId + '<br/>';
-               }else if(category == 'resolved'){
-                 s += 'UID: ' + object[field].data.receiptId + ' Suma: ' + object[field].data.totalPrice + '<br/>';
-               }
-             }
-             s += '</p>';
+            s += '<p>';
+            for (var field in object) {
+              if (category == 'failed') {
+                s += 'UID: ' + object[field].data.receiptId + '<br/>';
+              } else if (category == 'resolved') {
+                s += 'UID: ' + object[field].data.receiptId + ' Suma: ' + object[field].data.totalPrice + '<br/>';
+              }
+            }
+            s += '</p>';
 
-           }).then(function() {
-             if (category == 'resolved'){
-               if (s === '') {s = 'Neboli načítané bločky.';}
-               document.getElementById('processData').innerHTML = s;
-             }else if (category == 'failed'){
-               if (s === '') {s = 'Všetky bločky sa podarilo úspešne načítať.';}
-               document.getElementById('zoznamBlockyNok').innerHTML = s;
-             }
-           });
-         }
+          }).then(function() {
+            if (category == 'resolved') {
+              if (s === '') {
+                s = 'Neboli načítané bločky.';
+              }
+              document.getElementById('processData').innerHTML = s;
+            } else if (category == 'failed') {
+              if (s === '') {
+                s = 'Všetky bločky sa podarilo úspešne načítať.';
+              }
+              document.getElementById('zoznamBlockyNok').innerHTML = s;
+            }
+          });
+        }
 
-         function generateMRPKS(){
-           if (cmpId === '') {return;}
-           var s = '';
-           return getByName(cmpId,'resolved').then(function(object) {
-             if (!object) {return;}
-             for (var field in object) {
+        function generateMRPKS() {
+          if (cmpId === '') {
+            return;
+          }
+          var s = '';
+          return getByName(cmpId, 'resolved').then(function(object) {
+            if (!object) {
+              return;
+            }
 
-                 s += `
+            object.sort(function(a, b) {
+              var dateA = new Date(a.issueDate),
+                dateB = new Date(b.issueDate);
+              return dateA - dateB;
+            });
+
+            for (var field in object) {
+
+              s += `
                  <CashVoucher>
                  <DocumentNumber></DocumentNumber>
-                 <IssueDate>` + getDate(object[field].data.issueDate) + `</IssueDate>
+                 <IssueDate>` + getDate(object[field].data.issueDate) +
+                `</IssueDate>
                  <CurrencyCode>EUR</CurrencyCode>
                  <ValuesWithTax>T</ValuesWithTax>
                  `
-                 if (object[field].data.type == "PD") {
-                   if(object[field].data.freeTaxAmount != null){
-                     s+= `<ZeroTaxRateAmount>` + object[field].data.freeTaxAmount + `</ZeroTaxRateAmount>
+              if (object[field].data.type == "PD") {
+                if (object[field].data.freeTaxAmount != null) {
+                  s += `<ZeroTaxRateAmount>` + object[field].data.freeTaxAmount + `</ZeroTaxRateAmount>
                      `
-                   }
-                   if(object[field].data.taxBaseReduced != null){
-                     s+= `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
+                }
+                if (object[field].data.taxBaseReduced != null) {
+                  s += `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
                      `
-                   }
-                   if(object[field].data.taxBaseBasic != null){
-                     s+= `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
+                }
+                if (object[field].data.taxBaseBasic != null) {
+                  s += `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
                      `
-                   }
-                   if(object[field].data.vatAmountReduced != null){
-                     s+= `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
+                }
+                if (object[field].data.vatAmountReduced != null) {
+                  s += `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
                      `
-                    }
-                   if(object[field].data.vatAmountBasic != null){
-                     s+= `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
+                }
+                if (object[field].data.vatAmountBasic != null) {
+                  s += `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
                      `
-                   }
-                   if(object[field].data.issueDate != null){
-                    s+= `<TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>
+                }
+                if (object[field].data.issueDate != null) {
+                  s += `<TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>
                     `
-                   }
-                 }
-                 else if (object[field].data.type == "UF") {
-                    if(object[field].data.totalPrice != null){
-                        s+= `<ZeroTaxRateAmount>` + object[field].data.totalPrice + `</ZeroTaxRateAmount>
+                }
+              } else if (object[field].data.type == "UF") {
+                if (object[field].data.totalPrice != null) {
+                  s += `<ZeroTaxRateAmount>` + object[field].data.totalPrice + `</ZeroTaxRateAmount>
                         `
-                      }
-                 }
-                s+= `
+                }
+              }
+              s +=
+                `
                 <RoundingAmount></RoundingAmount>
                 <TotalWithTaxCurr>0.00</TotalWithTaxCurr>
                 <TotalWeight>0.000000</TotalWeight>
@@ -385,94 +406,96 @@
                 <CashVoucherSubType>0</CashVoucherSubType>
                 <CalcParams>UPDP=3;TRU=0.01;TRM=0;TRD=0;TRDCA=0;VATFRB=1</CalcParams>
                 <Company>
-                <CompanyId>`+ object[field].data.ico+`</CompanyId>
-                <Name>`+ object[field].data.organization.name+`</Name>
-                <Street>`+ object[field].data.organization.streetName +` `+ object[field].data.organization.propertyRegistrationNumber +`</Street>
-                <City>`+ object[field].data.organization.municipality +`</City>
-                <Country>`+ object[field].data.organization.country+`</Country>
-                <ZipCode>`+ object[field].data.organization.postalCode+`</ZipCode>
-                <VatNumber>`+ object[field].data.organization.dic+`</VatNumber>
+                <CompanyId>` +
+                object[field].data.ico + `</CompanyId>
+                <Name>` + object[field].data.organization.name + `</Name>
+                <Street>` + object[field].data.organization.streetName + ` ` + object[field].data.organization.propertyRegistrationNumber +
+                `</Street>
+                <City>` + object[field].data.organization.municipality + `</City>
+                <Country>` + object[field].data.organization.country + `</Country>
+                <ZipCode>` + object[field].data.organization
+                .postalCode + `</ZipCode>
+                <VatNumber>` + object[field].data.organization.dic + `</VatNumber>
                 `
 
-                if(object[field].data.organization.icDph != null){
-                  s+= `<VatNumberSK>`+ object[field].data.organization.icDph+`</VatNumberSK>
+              if (object[field].data.organization.icDph != null) {
+                s += `<VatNumberSK>` + object[field].data.organization.icDph + `</VatNumberSK>
                   `
-                }
-                s+= `</Company>
+              }
+              s += `</Company>
                 <Items>
       `
-                let polozky = object[field].data.items
-                if(polozky && polozky.length == 1 ){
-                   for (let item in polozky){
-                      s+= `
+              let polozky = object[field].data.items
+              if (polozky && polozky.length == 1) {
+                for (let item in polozky) {
+                  s += `
                       <Item>
                               <Description>` + polozky[item].name + `</Description>
-                                <Quantity>` + polozky[item].quantity + `</Quantity>
+                                <Quantity>` + polozky[item].quantity +
+                    `</Quantity>
                                 <TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
                                 `
-                                  s+= `<UnitPrice>` + (polozky[item].price/polozky[item].quantity).toFixed(3) + `</UnitPrice>
+                  s += `<UnitPrice>` + (polozky[item].price / polozky[item].quantity).toFixed(3) +
+                    `</UnitPrice>
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
                               </Item>`
-                   }
-                } else if(polozky && polozky.length > 1){
-                    polozky.forEach(function(item){
-                      s+= `
+                }
+              } else if (polozky && polozky.length > 1) {
+                polozky.forEach(function(item) {
+                  s += `
                       <Item>
                               <Description>` + item.name + `</Description>
-                                <Quantity>` + item.quantity + `</Quantity>
+                                <Quantity>` + item.quantity +
+                    `</Quantity>
                                 <TaxPercent>` + item.vatRate + `</TaxPercent>
-                                  <UnitPrice>` + (item.price/item.quantity).toFixed(3) + `</UnitPrice>
+                                  <UnitPrice>` + (item.price / item.quantity).toFixed(3) +
+                    `</UnitPrice>
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
                             </Item>
                             `
-                    })
-               }else if (object[field].data.type == "UF"){
-                      s+= `
+                })
+              } else if (object[field].data.type == "UF") {
+                s += `
                       <Item>
-                      <Description>` + object[field].data.invoiceNumber + `</Description>
+                      <Description>` + object[field].data.invoiceNumber +
+                  `</Description>
                         <Quantity>1.000000</Quantity>
                         <TaxPercent>0.00</TaxPercent>
                         <TaxAmount>0.000000</TaxAmount>
                         <DiscountPercent>0.00</DiscountPercent>
                         <UnitDiscount>0.000000</UnitDiscount>
                         <StockCardNumber>0.00</StockCardNumber>
-                        <UnitPrice>` + object[field].data.totalPrice + `</UnitPrice>
+                        <UnitPrice>` +
+                  object[field].data.totalPrice + `</UnitPrice>
                       <RowSumType>1</RowSumType>
                       <RowType>1</RowType>
                 </Item>
                 `
-               }
+              }
 
 
-            s+= `
+              s += `
             </Items>
               </CashVoucher>
               `
-             }
-             return s
-           })
-         }
+            }
+            return s
+          })
+        }
 
-         function getDate(data){
-           let dateItems=data.split(' ')
-           let datePart = dateItems[0].split('.')
-           return datePart[2] + '-' + datePart[1] + '-' + datePart[0]
-
-         }
-
-         function cleanStorage(category) {
-           return dbPromise.then(function(db) {
-             let tx = db.transaction(category, 'readwrite');
-             let store = tx.objectStore(category);
-             let request = store.clear();
-             request.onsuccess = function() {
-                 console.log("Data type "+ category +" pre identifikator " + cmpId +" boli ostranene.");
-             }
-             return request;
-           });
-         }
+        function cleanStorage(category) {
+          return dbPromise.then(function(db) {
+            let tx = db.transaction(category, 'readwrite');
+            let store = tx.objectStore(category);
+            let request = store.clear();
+            request.onsuccess = function() {
+              console.log("Data type " + category + " pre identifikator " + cmpId + " boli ostranene.");
+            }
+            return request;
+          });
+        }
 
         return {
           dbPromise: (dbPromise),
@@ -488,17 +511,24 @@
       beginScan()
     }
 
-    function delStorage(){
-        idbApp.cleanStorage('resolved').then(function() {
-          idbApp.cleanStorage('failed').then(function() {
-            //return to step1
-            $("#bdelmem").hide();
-            $("div#processData").hide();
-            $("#bstep4").hide();
-            $("#bstep2").show();
-            $("#init").show();
-          })
+    function delStorage() {
+      idbApp.cleanStorage('resolved').then(function() {
+        idbApp.cleanStorage('failed').then(function() {
+          //return to step1
+          $("#bdelmem").hide();
+          $("div#processData").hide();
+          $("#bstep4").hide();
+          $("#bstep2").show();
+          $("#init").show();
         })
+      })
+    }
+
+    function getDate(data) {
+      let dateItems = data.split(' ')
+      let datePart = dateItems[0].split('.')
+      return datePart[2] + '-' + datePart[1] + '-' + datePart[0]
+
     }
 
     function processData() {
@@ -509,74 +539,76 @@
       $("#bstep3").hide();
       $("div#processData").show();
       idbApp.displayByName('failed');
-      idbApp.showCardinality(cmpId,'failed').then(function(cardinality) {
+      idbApp.showCardinality(cmpId, 'failed').then(function(cardinality) {
+        document.getElementById('pocetnok').innerHTML = cardinality;
+        if (cardinality > 0) {
+          $("#bZobrazBezDat").show()
+          $("#bretry").show()
+        }
+
+      });
+      idbApp.showCardinality(cmpId, 'resolved').then(function(cardinality) {
+        document.getElementById('pocetok').innerHTML = cardinality;
+        if (cardinality > 0) {
+          $("#bstep4").show();
+        }
+      });
+
+    }
+
+    function exportData() {
+
+      let exportType = $('#formatVystupu').val();
+
+      //v cykle prejdem naskenovane veci
+      switch (exportType) {
+        case 'ks':
+          idbApp.generateMRPKS().then(function(xmldata) {
+            let eD
+            eD = `<?xml version="1.0" encoding="UTF-8"?>
+              <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
+              <CashVouchers>`
+            eD += xmldata + ` </CashVouchers>
+              </MRPKSData>`
+            download('Blocky_' + cmpId + '.xml', eD)
+          });
+          break;
+      }
+      $("#bdelmem").show();
+    }
+
+    function download(filename, text) {
+      var pom = document.createElement('a');
+      pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      pom.setAttribute('download', filename);
+      pom.click();
+    }
+
+    function retryFailed() {
+      //get unresolved items a try to resolve them
+
+      idbApp.getByName(cmpId, 'failed').then(function(object) {
+        if (!object) {
+          return;
+        }
+
+        for (var field in object) {
+          if (object[field].id !== null) {
+            getReceiptData(object[field].id);
+          }
+        }
+        idbApp.displayByName('failed');
+        idbApp.showCardinality(cmpId, 'failed').then(function(cardinality) {
           document.getElementById('pocetnok').innerHTML = cardinality;
-          if(cardinality>0){
+          if (cardinality > 0) {
             $("#bZobrazBezDat").show()
             $("#bretry").show()
           }
 
-      });
-      idbApp.showCardinality(cmpId,'resolved').then(function(cardinality) {
+        });
+        idbApp.showCardinality(cmpId, 'resolved').then(function(cardinality) {
           document.getElementById('pocetok').innerHTML = cardinality;
-            if(cardinality>0){
-              $("#bstep4").show();
-            }
-      });
-
-    }
-
-    function exportData(){
-
-        let exportType = $('#formatVystupu').val();
-
-        //v cykle prejdem naskenovane veci
-        switch(exportType) {
-          case 'ks':
-            idbApp.generateMRPKS().then(function(xmldata) {
-              let eD
-              eD = `<?xml version="1.0" encoding="UTF-8"?>
-              <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
-              <CashVouchers>`
-              eD += xmldata + ` </CashVouchers>
-              </MRPKSData>`
-              download('Blocky_' + cmpId + '.xml', eD)
-            });
-            break;
-          }
-          $("#bdelmem").show();
-    }
-
-      function download(filename, text) {
-        var pom = document.createElement('a');
-        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        pom.setAttribute('download', filename);
-        pom.click();
-      }
-
-      function retryFailed(){
-        //get unresolved items a try to resolve them
-
-        idbApp.getByName(cmpId,'failed').then(function(object) {
-          if (!object) {return;}
-
-          for (var field in object) {
-             if(object[field].id !== null){
-               getReceiptData(object[field].id);
-            }
-          }
-          idbApp.displayByName('failed');
-          idbApp.showCardinality(cmpId,'failed').then(function(cardinality) {
-              document.getElementById('pocetnok').innerHTML = cardinality;
-              if(cardinality>0){
-                $("#bZobrazBezDat").show()
-                $("#bretry").show()
-              }
-
-          });
-          idbApp.showCardinality(cmpId,'resolved').then(function(cardinality) {
-              document.getElementById('pocetok').innerHTML = cardinality;
-          });
+        });
 
       })
     }
@@ -665,7 +697,8 @@
           //// TODO: Neplatný bloček!
 
           if (retData.returnValue == 0) {
-            var returnedData = retData.receipt;
+            var returnedData = retData.receipt
+            let issueDate = getDate(retData.receipt.issueDate)
             $("div#alerts").html('<div class="alert alert-success" role="alert">Suma: ' + returnedData.totalPrice + '</div>')
             window.setTimeout(function() {
               $(".alert-success").fadeTo(500, 0).slideUp(500, function() {
@@ -673,7 +706,7 @@
                 outputMessage.hidden = false;
               });
             }, 2000);
-            idbApp.saveResolved(id, returnedData);
+            idbApp.saveResolved(id, returnedData, issueDate);
             beep(50, 600, 100);
 
           }
@@ -705,13 +738,13 @@
         $("#bstep2").show();
       }
 
-      $('#cmpId').keypress(function (e) {
+      $('#cmpId').keypress(function(e) {
         if (e.which == 13) {
           setCmpStorage()
         }
       });
 
-     a = new AudioContext() // browsers limit the number of concurrent audio contexts, so you better re-use'em
+      a = new AudioContext() // browsers limit the number of concurrent audio contexts, so you better re-use'em
 
 
     });
