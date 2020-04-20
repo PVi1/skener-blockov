@@ -680,14 +680,37 @@
       }
       requestAnimationFrame(tick);
     }
+    function getFormattedDate(data){
+      return data.substr(4,2)+"."+ data.substr(2,2) + "." + "20" + data.substr(0,2) + " " + data.substr(6,2) + ":" + data.substr(8,2) + ":" + data.substr(10,2)
+    }
 
     function getReceiptData(id) {
+      //mame online alebo offline potvrdenku?
+      let data = id.split(':')
+      if ( data.length == 1){
+        var okp = data[0]
+        var data_json = JSON.stringify({
+          receiptId: okp
+        })
+      }else if (data.length == 5){
+        var okp = data[0]
+        var cashRegisterCode = data[1]
+        var issueDateFormatted = getFormattedDate(data[2])
+        var receiptNumber = data[3]
+        var totalAmount = data[4]
+        var data_json = JSON.stringify({
+          okp: okp,
+          cashRegisterCode: cashRegisterCode,
+          receiptNumber: receiptNumber,
+          totalAmount: totalAmount,
+          issueDateFormatted: issueDateFormatted
+        })
+      }
+
       var jqxhr = $.ajax({
           method: "POST",
           url: "https://ekasa.financnasprava.sk/mdu/api/v1/opd/receipt/find",
-          data: JSON.stringify({
-            receiptId: id
-          }),
+          data: data_json,
           dataType: "json",
           crossDomain: "true",
           contentType: "application/json;charset=utf-8",
