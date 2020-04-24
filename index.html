@@ -109,7 +109,8 @@
           <label for="formatVystupu" class="col-sm-2 col-form-label">Formát výstupu</label>
           <div class="col-sm-10">
             <select class="form-control" id="formatVystupu">
-              <option value="ks">MRP K/S</option>
+              <option value="ks">MRP K/S Pokladničné doklady</option>
+              <option value="ks_zav">MRP K/S Ostatné záväzky</option>
             </select>
           </div>
         </div>
@@ -338,11 +339,22 @@
           });
         }
 
-        function generateMRPKS() {
+        function generateMRPKS(druh) {
+          //druh
+          // 0 CashVouchers
+          //1 OtherPayables
           if (cmpId === '') {
             return;
           }
-          var s = '';
+          var s = `<?xml version="1.0" encoding="UTF-8"?>
+              <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
+              `;
+          if(druh == 0) {
+              s += '<CashVouchers>';
+          }
+          else if (druh == 1) {
+             s+= '<OtherPayables>'
+          }
           return getByName(cmpId, 'resolved').then(function(object) {
             if (!object) {
               return;
@@ -355,9 +367,13 @@
             });
 
             for (var field in object) {
-
+              if(druh == 0) {
+                  s += '<CashVoucher>';
+              }
+              else if (druh == 1) {
+                 s+= '<Payable>'
+              }
               s += `
-                 <CashVoucher>
                  <DocumentNumber></DocumentNumber>
                  <IssueDate>` + getDate(object[field].data.issueDate) +
                 `</IssueDate>
@@ -402,9 +418,13 @@
                 <TotalWeight>0.000000</TotalWeight>
                 <VatRegime>0</VatRegime>
                 <VatCountry>SK</VatCountry>
-                <CashVoucherType>V</CashVoucherType>
-                <CashVoucherSubType>0</CashVoucherSubType>
-                <CalcParams>UPDP=3;TRU=0.01;TRM=0;TRD=0;TRDCA=0;VATFRB=1</CalcParams>
+                `
+                if(druh == 0) {
+                    s += `<CashVoucherType>V</CashVoucherType>
+                    <CashVoucherSubType>0</CashVoucherSubType>
+                    `;
+                }
+                s += `<CalcParams>UPDP=3;TRU=0.01;TRM=0;TRD=0;TRDCA=0;VATFRB=1</CalcParams>
                 <Company>
                 <CompanyId>` +
                 object[field].data.ico + `</CompanyId>
@@ -476,11 +496,23 @@
               }
 
 
-              s += `
-            </Items>
-              </CashVoucher>
-              `
+              s += '</Items>'
+
+              if(druh == 0) {
+                  s += '</CashVoucher>';
+              }
+              else if (druh == 1) {
+                 s+= '</Payable>'
+              }
+
             }
+            if(druh == 0) {
+                s += '</CashVouchers>';
+            }
+            else if (druh == 1) {
+               s+= '</OtherPayables>'
+            }
+            s += '</MRPKSData>'
             return s
           })
         }
@@ -563,16 +595,15 @@
       //v cykle prejdem naskenovane veci
       switch (exportType) {
         case 'ks':
-          idbApp.generateMRPKS().then(function(xmldata) {
-            let eD
-            eD = `<?xml version="1.0" encoding="UTF-8"?>
-              <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
-              <CashVouchers>`
-            eD += xmldata + ` </CashVouchers>
-              </MRPKSData>`
-            download('Blocky_' + cmpId + '.xml', eD)
+          idbApp.generateMRPKS('0').then(function(xmldata) {
+            download('Blocky_' + cmpId + '.xml', xmldata)
           });
           break;
+        case 'ks_zav':
+          idbApp.generateMRPKS('1').then(function(xmldata) {
+            download('Zavazky_' + cmpId + '.xml', xmldata)
+          });
+        break;
       }
       $("#bdelmem").show();
     }
