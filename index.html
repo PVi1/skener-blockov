@@ -450,7 +450,7 @@
                 for (let item in polozky) {
                   s += `
                       <Item>
-                              <Description>` + polozky[item].name + `</Description>
+                              <Description>` + escape(polozky[item].name) + `</Description>
                                 <Quantity>` + polozky[item].quantity +
                     `</Quantity>
                                 <TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
@@ -465,7 +465,7 @@
                 polozky.forEach(function(item) {
                   s += `
                       <Item>
-                              <Description>` + item.name + `</Description>
+                              <Description>` + escape(item.name) + `</Description>
                                 <Quantity>` + item.quantity +
                     `</Quantity>
                                 <TaxPercent>` + item.vatRate + `</TaxPercent>
@@ -562,6 +562,21 @@
       return datePart[2] + '-' + datePart[1] + '-' + datePart[0]
 
     }
+
+    function escape(text) {
+          return String(text).replace(/(['"<>&'])(\w+;)?/g, (match, char, escaped) => {
+              if(escaped)
+                  return match
+
+              switch(char) {
+                  case '\'': return '&quot;'
+                  case '"': return '&apos;'
+                  case '<': return '&lt;'
+                  case '>': return '&gt;'
+                  case '&': return '&amp;'
+              }
+          })
+      }
 
     function processData() {
       video.srcObject.getTracks().forEach(function(track) {
