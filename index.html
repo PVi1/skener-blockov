@@ -428,8 +428,8 @@
                 <Company>
                 <CompanyId>` +
                 object[field].data.ico + `</CompanyId>
-                <Name>` + object[field].data.organization.name + `</Name>
-                <Street>` + object[field].data.organization.streetName + ` ` + object[field].data.organization.propertyRegistrationNumber +
+                <Name>` + escape(object[field].data.organization.name) + `</Name>
+                <Street>` + escape(object[field].data.organization.streetName) + ` ` + object[field].data.organization.propertyRegistrationNumber +
                 `</Street>
                 <City>` + object[field].data.organization.municipality + `</City>
                 <Country>` + object[field].data.organization.country + `</Country>
