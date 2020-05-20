@@ -349,11 +349,10 @@
           var s = `<?xml version="1.0" encoding="UTF-8"?>
               <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
               `;
-          if(druh == 0) {
-              s += '<CashVouchers>';
-          }
-          else if (druh == 1) {
-             s+= '<OtherPayables>'
+          if (druh == 0) {
+            s += '<CashVouchers>';
+          } else if (druh == 1) {
+            s += '<OtherPayables>'
           }
           return getByName(cmpId, 'resolved').then(function(object) {
             if (!object) {
@@ -367,11 +366,10 @@
             });
 
             for (var field in object) {
-              if(druh == 0) {
-                  s += '<CashVoucher>';
-              }
-              else if (druh == 1) {
-                 s+= '<Payable>'
+              if (druh == 0) {
+                s += '<CashVoucher>';
+              } else if (druh == 1) {
+                s += '<Payable>'
               }
               s += `
                  <DocumentNumber></DocumentNumber>
@@ -419,17 +417,18 @@
                 <VatRegime>0</VatRegime>
                 <VatCountry>SK</VatCountry>
                 `
-                if(druh == 0) {
-                    s += `<CashVoucherType>V</CashVoucherType>
+              if (druh == 0) {
+                s += `<CashVoucherType>V</CashVoucherType>
                     <CashVoucherSubType>0</CashVoucherSubType>
                     `;
-                }
-                s += `<CalcParams>UPDP=3;TRU=0.01;TRM=0;TRD=0;TRDCA=0;VATFRB=1</CalcParams>
+              }
+              s += `<CalcParams>UPDP=3;TRU=0.01;TRM=0;TRD=0;TRDCA=0;VATFRB=1</CalcParams>
                 <Company>
                 <CompanyId>` +
                 object[field].data.ico + `</CompanyId>
                 <Name>` + escape(object[field].data.organization.name) + `</Name>
-                <Street>` + escape(object[field].data.organization.streetName) + ` ` + object[field].data.organization.propertyRegistrationNumber +
+                <Street>` + escape(object[field].data.organization.streetName) + ` ` + object[field].data
+                .organization.propertyRegistrationNumber +
                 `</Street>
                 <City>` + object[field].data.organization.municipality + `</City>
                 <Country>` + object[field].data.organization.country + `</Country>
@@ -455,8 +454,13 @@
                     `</Quantity>
                                 <TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
                                 `
-                  s += `<UnitPrice>` + (polozky[item].price / polozky[item].quantity).toFixed(3) +
-                    `</UnitPrice>
+                  s += `<UnitPrice>`
+                  if (polozky[item].quantity > 0) {
+                    s += (polozky[item].price / polozky[item].quantity).toFixed(3)
+                  } else {
+                    s += (polozky[item].price).toFixed(3)
+                  }
+                  s += `</UnitPrice>
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
                               </Item>`
@@ -469,8 +473,14 @@
                                 <Quantity>` + item.quantity +
                     `</Quantity>
                                 <TaxPercent>` + item.vatRate + `</TaxPercent>
-                                  <UnitPrice>` + (item.price / item.quantity).toFixed(3) +
-                    `</UnitPrice>
+                                  <UnitPrice>`
+                  if (item.quantity > 0) {
+                    s += (item.price / item.quantity).toFixed(3)
+                  } else {
+                    s += (item.price).toFixed(3)
+                  }
+
+                  s += `</UnitPrice>
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
                             </Item>
@@ -498,19 +508,19 @@
 
               s += '</Items>'
 
-              if(druh == 0) {
-                  s += '</CashVoucher>';
-              }
-              else if (druh == 1) {
-                 s+= '</Payable>'
+              if (druh == 0) {
+                s += `</CashVoucher>
+                `
+              } else if (druh == 1) {
+                s += `</Payable>
+                `
               }
 
             }
-            if(druh == 0) {
-                s += '</CashVouchers>';
-            }
-            else if (druh == 1) {
-               s+= '</OtherPayables>'
+            if (druh == 0) {
+              s += '</CashVouchers>';
+            } else if (druh == 1) {
+              s += '</OtherPayables>'
             }
             s += '</MRPKSData>'
             return s
@@ -564,19 +574,24 @@
     }
 
     function escape(text) {
-          return String(text).replace(/(['"<>&'])(\w+;)?/g, (match, char, escaped) => {
-              if(escaped)
-                  return match
+      return String(text).replace(/(['"<>&'])(\w+;)?/g, (match, char, escaped) => {
+        if (escaped)
+          return match
 
-              switch(char) {
-                  case '\'': return '&quot;'
-                  case '"': return '&apos;'
-                  case '<': return '&lt;'
-                  case '>': return '&gt;'
-                  case '&': return '&amp;'
-              }
-          })
-      }
+        switch (char) {
+          case '\'':
+            return '&quot;'
+          case '"':
+            return '&apos;'
+          case '<':
+            return '&lt;'
+          case '>':
+            return '&gt;'
+          case '&':
+            return '&amp;'
+        }
+      })
+    }
 
     function processData() {
       video.srcObject.getTracks().forEach(function(track) {
@@ -618,7 +633,7 @@
           idbApp.generateMRPKS('1').then(function(xmldata) {
             download('Zavazky_' + cmpId + '.xml', xmldata)
           });
-        break;
+          break;
       }
       $("#bdelmem").show();
     }
@@ -726,19 +741,21 @@
       }
       requestAnimationFrame(tick);
     }
-    function getFormattedDate(data){
-      return data.substr(4,2)+"."+ data.substr(2,2) + "." + "20" + data.substr(0,2) + " " + data.substr(6,2) + ":" + data.substr(8,2) + ":" + data.substr(10,2)
+
+    function getFormattedDate(data) {
+      return data.substr(4, 2) + "." + data.substr(2, 2) + "." + "20" + data.substr(0, 2) + " " + data.substr(6, 2) + ":" + data.substr(8, 2) + ":" + data.substr(10, 2)
     }
 
     function getReceiptData(id) {
+      //TODO: dorob spracovanie neuspesnych blockov, odstran ich z fronty po resolvovani
       //mame online alebo offline potvrdenku?
       let data = id.split(':')
-      if ( data.length == 1){
+      if (data.length == 1) {
         var okp = data[0]
         var data_json = JSON.stringify({
           receiptId: okp
         })
-      }else if (data.length == 5){
+      } else if (data.length == 5) {
         var okp = data[0]
         var cashRegisterCode = data[1]
         var issueDateFormatted = getFormattedDate(data[2])
@@ -783,6 +800,7 @@
         })
         .fail(function() {
           //nepodariosa ziskat data
+          //TODO: osetri rate limit HTTP response code 731
           $("div#alerts").html('<div class="alert alert-warning" role="alert">Nebolo možné overiť platnosť bločku.</div>')
           // Store
           idbApp.saveFailed(id);
