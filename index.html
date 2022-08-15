@@ -411,7 +411,6 @@
               }
               s +=
                 `
-                <RoundingAmount></RoundingAmount>
                 <TotalWithTaxCurr>0.00</TotalWithTaxCurr>
                 <TotalWeight>0.000000</TotalWeight>
                 <VatRegime>0</VatRegime>
@@ -486,7 +485,7 @@
                             </Item>
                             `
                 })
-              } else if (object[field].data.type == "UF") {
+              } else if (object[field].data.type == "UF") { //uhrada faktury
                 s += `
                       <Item>
                       <Description>` + object[field].data.invoiceNumber +
@@ -505,8 +504,36 @@
                 `
               }
 
-
-              s += '</Items>'
+              //zaokruhlujeme blocky platene v hotovosti
+              let predZaokruhlenim = object[field].data.taxBaseBasic + object[field].data.taxBaseReduced + object[field].data.freeTaxAmount + object[field].data.vatAmountBasic + object[field].data.vatAmountReduced
+              if (object[field].data.totalPrice != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
+                  s += `</Items>
+                  <RoundingAmount>`
+                  switch(predZaokruhlenim * 100 % 10) {
+                    case 1:
+                    case 6:
+                      s += '-0.01'
+                      break;
+                    case 2:
+                    case 7:
+                        s += '-0.02'
+                      break;
+                    case 3:
+                    case 8:
+                        s += '0.02'
+                      break;
+                    case 4:
+                    case 9:
+                        s += '0.01'
+                      break;
+                  }
+                    s += `</RoundingAmount>`
+              }
+              else {
+                s += `</Items>
+                <RoundingAmount></RoundingAmount>
+                `
+              }
 
               if (druh == 0) {
                 s += `</CashVoucher>
