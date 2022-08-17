@@ -505,11 +505,11 @@
               }
 
               //zaokruhlujeme blocky platene v hotovosti
-              let predZaokruhlenim = object[field].data.taxBaseBasic + object[field].data.taxBaseReduced + object[field].data.freeTaxAmount + object[field].data.vatAmountBasic + object[field].data.vatAmountReduced
-              if (object[field].data.totalPrice != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
+              let predZaokruhlenim = (object[field].data.taxBaseBasic*100) + (object[field].data.taxBaseReduced*100) + (object[field].data.freeTaxAmount*100) + (object[field].data.vatAmountBasic*100) + (object[field].data.vatAmountReduced*100)
+              if ((object[field].data.totalPrice*100) != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
                   s += `</Items>
                   <RoundingAmount>`
-                  switch(predZaokruhlenim * 100 % 10) {
+                  switch(predZaokruhlenim % 10) {
                     case 1:
                     case 6:
                       s += '-0.01'
