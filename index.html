@@ -4,23 +4,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="description" content="Skener blockov">
+  <meta name="author" content="Peter Vilhan, Mark Otto, Jacob Thornton, and Bootstrap contributors">
   <meta name="generator" content="Jekyll v3.8.6">
   <title>Skener bločkov</title>
 
   <link rel="canonical" href="https://qr.uvaaccess.eu/">
 
   <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
   <!-- Favicons -->
-  <link rel="apple-touch-icon" href="/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+  <!-- <link rel="apple-touch-icon" href="/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
   <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
   <link rel="manifest" href="/docs/4.4/assets/img/favicons/manifest.json">
   <link rel="mask-icon" href="/docs/4.4/assets/img/favicons/safari-pinned-tab.svg" color="#563d7c">
   <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon.ico">
   <meta name="msapplication-config" content="/docs/4.4/assets/img/favicons/browserconfig.xml">
+  -->
   <meta name="theme-color" content="#563d7c">
 
 
@@ -75,6 +76,14 @@
         <label for="cmpId">Identifikátor spoločnosti</label>
         <input type="text" class="form-control" id="cmpId" aria-describedby="idHelp" required>
         <small id="idHelp" class="form-text text-muted">Pomenuj si túto skupinu bločkov, tak aby ju bolo možné neskôr identifikovať.</small>
+      </div>
+       <div class="form-group">
+        <label for="cmpDPH">Platiteľ DPH?</label>
+        <select class="form-control" id="cmpDPH" aria-describedby="idDPH">
+          <option selected value="1">Áno</option>
+          <option value="0">Nie</option>
+        </select>
+        <small id="idDPH" class="form-text text-muted">Je spoločnosť platiteľom DPH?</small>
       </div>
 
     </div>
@@ -177,6 +186,7 @@
 
     function setCmpStorage() {
       cmpId = document.getElementById("cmpId").value
+      cmpDPH = document.getElementById("cmpDPH").value
 
       if (cmpId === "") {
         $("#cmpId").addClass('is-invalid')
@@ -379,34 +389,45 @@
                  <ValuesWithTax>T</ValuesWithTax>
                  `
               if (object[field].data.type == "PD") {
-                if (object[field].data.freeTaxAmount != null) {
-                  s += `<ZeroTaxRateAmount>` + object[field].data.freeTaxAmount + `</ZeroTaxRateAmount>
-                     `
-                }
-                if (object[field].data.taxBaseReduced != null) {
-                  s += `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
-                     `
-                }
-                if (object[field].data.taxBaseBasic != null) {
-                  s += `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
-                     `
-                }
-                if (object[field].data.vatAmountReduced != null) {
-                  s += `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
-                     `
-                }
-                if (object[field].data.vatAmountBasic != null) {
-                  s += `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
-                     `
-                }
-                if (object[field].data.issueDate != null) {
-                  s += `<TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>
+                if(cmpDPH == "1"){ 
+                  //platitel dph
+                  if (object[field].data.freeTaxAmount != null) {
+                    s += `<ZeroTaxRateAmount>` + object[field].data.freeTaxAmount + `</ZeroTaxRateAmount>
+                      `
+                  }
+                  if (object[field].data.taxBaseReduced != null) {
+                    s += `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
+                      `
+                  }
+                  if (object[field].data.taxBaseBasic != null) {
+                    s += `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
+                      `
+                  }
+                  if (object[field].data.vatAmountReduced != null) {
+                    s += `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
+                      `
+                  }
+                  if (object[field].data.vatAmountBasic != null) {
+                    s += `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
+                      `
+                  }
+                  if (object[field].data.issueDate != null) {
+                    s += `<TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>
+                      `
+                  }
+                }else {
+                    s += `<ZeroTaxRateAmount>0.00</ZeroTaxRateAmount>
+                    <ReducedTaxRateAmount>0.00</ReducedTaxRateAmount>
+                    <BaseTaxRateAmount>0.00</BaseTaxRateAmount>
+                    <RoundingAmount>` + object[field].data.totalPrice + `</RoundingAmount>
+                    <ReducedTaxRateTax>0.00</ReducedTaxRateTax>
+                    <BaseTaxRateTax>0.00</BaseTaxRateTax>               
+                    <TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>     
                     `
                 }
               } else if (object[field].data.type == "UF") {
                 if (object[field].data.totalPrice != null) {
-                  s += `<ZeroTaxRateAmount>` + object[field].data.totalPrice + `</ZeroTaxRateAmount>
-                        `
+                  s += `<ZeroTaxRateAmount>` + object[field].data.totalPrice + `</ZeroTaxRateAmount>                        `
                 }
               }
               s +=
@@ -448,11 +469,18 @@
                 for (let item in polozky) {
                   s += `
                       <Item>
-                              <Description>` + escape(polozky[item].name) + `</Description>
+                              <Description>` + escape(polozky[item].name).trim() + `</Description>
                                 <Quantity>` + polozky[item].quantity +
-                    `</Quantity>
-                                <TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
-                                `
+                    `</Quantity>`
+                  if( cmpDPH == "1" ){
+
+                    s += `<TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
+                          `
+                  }else {
+                    
+                    s += `<TaxPercent>0.00</TaxPercent>`
+
+                  }
                   s += `<UnitPrice>`
                   if (polozky[item].quantity > 0) {
                     s += (polozky[item].price / polozky[item].quantity).toFixed(3)
@@ -468,11 +496,24 @@
                 polozky.forEach(function(item) {
                   s += `
                       <Item>
-                              <Description>` + escape(item.name) + `</Description>
+                              <Description>` + escape(item.name).trim() + `</Description>
                                 <Quantity>` + item.quantity +
                     `</Quantity>
-                                <TaxPercent>` + item.vatRate + `</TaxPercent>
-                                  <UnitPrice>`
+                    `
+                  if( cmpDPH == "1" ){
+
+                      s += `<TaxPercent>` + item.vatRate + `</TaxPercent>
+                      `
+
+                    }else {
+
+                      s += `<TaxPercent>0.00</TaxPercent>
+                      `
+
+                    } 
+  
+                  s += `<UnitPrice>`
+
                   if (item.quantity > 0) {
                     s += (item.price / item.quantity).toFixed(3)
                   } else {
@@ -589,6 +630,7 @@
           $("#bstep4").hide();
           $("#bstep2").show();
           $("#init").show();
+          oldCode ="";
         })
       })
     }
