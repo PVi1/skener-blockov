@@ -359,6 +359,7 @@
           var s = `<?xml version="1.0" encoding="UTF-8"?>
               <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
               `;
+          var DPHsumar = [];
           if (druh == 0) {
             s += '<CashVouchers>';
           } else if (druh == 1) {
@@ -476,6 +477,11 @@
 
                     s += `<TaxPercent>` + polozky[item].vatRate + `</TaxPercent>
                           `
+                    if (typeof DPHsumar[polozky[item].vatRate] === 'undefined') {
+                      DPHsumar[polozky[item].vatRate] = 0;
+                    }
+                    DPHsumar[polozky[item].vatRate] += polozky[item].price;
+
                   }else {
                     
                     s += `<TaxPercent>0.00</TaxPercent>`
@@ -490,7 +496,7 @@
                   s += `</UnitPrice>
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
-                              </Item>`
+                              </Item>`                  
                 }
               } else if (polozky && polozky.length > 1) {
                 polozky.forEach(function(item) {
@@ -504,6 +510,10 @@
 
                       s += `<TaxPercent>` + item.vatRate + `</TaxPercent>
                       `
+                      if (typeof DPHsumar[item.vatRate] === 'undefined') {
+                        DPHsumar[item.vatRate] = 0;
+                      }
+                      DPHsumar[item.vatRate] += item.price;
 
                     }else {
 
@@ -524,7 +534,8 @@
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
                             </Item>
-                            `
+                            `                 
+
                 })
               } else if (object[field].data.type == "UF") { //uhrada faktury
                 s += `
@@ -575,6 +586,25 @@
                 <RoundingAmount></RoundingAmount>
                 `
               }
+              //sumar sadzieb DPH https://faq.mrp.cz/faqcz/obrazky/jkimage/mrpks_xml_2_0_doc_pk.txt CashVouchers/CashVoucher/SumValues/SumValue
+              s += `<SumValues>
+                `
+              DPHsumar.forEach(function(item, index) {
+                if (item > 0) {
+                  s += `<SumValue>
+                  <TaxPercent>` + index + `</TaxPercent>
+                  <Amount>` + item + `</Amount>
+                  <Tax>` + (item * index / 100).toFixed(2) + `</Tax>
+                  </SumValue>
+                  `
+                }
+              })
+              //empty array 
+              DPHsumar = [];
+
+              s += `</SumValues>
+                  `
+
 
               if (druh == 0) {
                 s += `</CashVoucher>
