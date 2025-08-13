@@ -554,7 +554,9 @@
               //sumar sadzieb DPH https://faq.mrp.cz/faqcz/obrazky/jkimage/mrpks_xml_2_0_doc_pk.txt CashVouchers/CashVoucher/SumValues/SumValue
               s += `<SumValues>
                 `
-              DPHsumar.forEach(function(item, index) {
+              
+              DPHsumar.forEach(function(item, index) {               
+
                 if (item > 0) {
                   s += `<SumValue>
                   <TaxPercent>` + index + `</TaxPercent>                  
@@ -563,21 +565,21 @@
                   if (index == 23){
                     s += `<TaxType>1</TaxType>
                     `
-                    BaseSuma += (item / (1 + (index / 100))).toFixed(2)
-                    BaseTax += (BaseSuma * index / 100).toFixed(2)
-                     s += `<Amount>` + BaseSuma + `</Amount>
-                     <Tax>` + BaseTax + `</Tax>
-                  <TaxApplied>` + BaseTax + `</TaxApplied>
+                    BaseSuma += (item / (1 + (index / 100)))
+                    BaseTax += (BaseSuma * index / 100)
+                     s += `<Amount>` + BaseSuma.toFixed(2) + `</Amount>
+                     <Tax>` + BaseTax.toFixed(2) + `</Tax>
+                  <TaxApplied>` + BaseTax.toFixed(2) + `</TaxApplied>
                   </SumValue>
                   `
                   }else if (index > 0 && index < 23) {
                     s += `<TaxType>2</TaxType>
                     `
-                    ReducedSuma += (item / (1 + (index / 100))).toFixed(2)
-                    ReducedTax += (ReducedSuma * index / 100).toFixed(2)
-                      s += `<Amount>` + ReducedSuma + `</Amount>
-                      <Tax>` + ReducedTax + `</Tax>
-                  <TaxApplied>` + ReducedTax + `</TaxApplied>
+                    ReducedSuma += (item / (1 + (index / 100)))
+                    ReducedTax += (ReducedSuma * index / 100)
+                      s += `<Amount>` + ReducedSuma.toFixed(2) + `</Amount>
+                      <Tax>` + ReducedTax.toFixed(2) + `</Tax>
+                  <TaxApplied>` + ReducedTax.toFixed(2) + `</TaxApplied>
                   </SumValue>
                   `
                   }
@@ -586,7 +588,7 @@
                     <Amount>` + item + `</Amount>
                     </SumValue>
                     `
-                    ZeroSuma += item.toFixed(2)
+                    ZeroSuma += item
                   }
                  
                 }
@@ -601,35 +603,35 @@
                     s += `<ZeroTaxRateAmount>` + object[field].data.freeTaxAmount + `</ZeroTaxRateAmount>
                       `
                   } else {
-                    s += `<ZeroTaxRateAmount>` + ZeroSuma + `</ZeroTaxRateAmount>
+                    s += `<ZeroTaxRateAmount>` + ZeroSuma.toFixed(2) + `</ZeroTaxRateAmount>
                       `
                   }
                   if (object[field].data.taxBaseReduced != null) {
                     s += `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
                       `
                   } else {
-                    s += `<ReducedTaxRateAmount>` + ReducedSuma + `</ReducedTaxRateAmount>
+                    s += `<ReducedTaxRateAmount>` + ReducedSuma.toFixed(2) + `</ReducedTaxRateAmount>
                       `
                   }
                   if (object[field].data.taxBaseBasic != null) {
                     s += `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
                       `
                   } else {
-                    s += `<BaseTaxRateAmount>` + BaseSuma + `</BaseTaxRateAmount>
+                    s += `<BaseTaxRateAmount>` + BaseSuma.toFixed(2) + `</BaseTaxRateAmount>
                       `
                   }
                   if (object[field].data.vatAmountReduced != null) {
                     s += `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
                       `
                   } else {
-                    s += `<ReducedTaxRateTax>` + ReducedTax + `</ReducedTaxRateTax>
+                    s += `<ReducedTaxRateTax>` + ReducedTax.toFixed(2) + `</ReducedTaxRateTax>
                       `
                   }
                   if (object[field].data.vatAmountBasic != null) {
                     s += `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
                       `
                   } else {
-                    s += `<BaseTaxRateTax>` + BaseTax + `</BaseTaxRateTax>
+                    s += `<BaseTaxRateTax>` + BaseTax.toFixed(2) + `</BaseTaxRateTax>
                       `
                   }
                   if (object[field].data.issueDate != null) {
