@@ -803,14 +803,31 @@
       $("#bdelmem").show();
     }
 //TODO: fixnut txt na konci a zmenit download sposob
-
+/*
     function download(filename, text) {
       var pom = document.createElement('a');
       pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
       pom.setAttribute('download', filename);
       pom.click();
     }
+*/
+    function download(filename, xmlString) {
+      const blob = new Blob([xmlString], { type: 'application/xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
 
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename; 
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // uvoľniť URL (po krátkej chvíli kvôli iOS)
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
+    }
+    
     function retryFailed() {
       //get unresolved items a try to resolve them
 
