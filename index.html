@@ -359,14 +359,7 @@
           var s = `<?xml version="1.0" encoding="UTF-8"?>
               <MRPKSData version="2.0" countryCode="SK" currencyCode="EUR">
               `;
-          var DPHsumar = []
-          var BaseSuma = 0
-          var BaseTax = 0
-          var ReducedSuma = 0
-          var ReducedTax = 0
-          var ReducedSumaAll = 0
-          var ReducedTaxAll = 0
-          var ZeroSuma = 0
+         
 
           if (druh == 0) {
             s += '<CashVouchers>';
@@ -385,6 +378,16 @@
             });
 
             for (var field in object) {
+
+              var DPHsumar = []
+              var BaseSuma = 0
+              var BaseTax = 0
+              var ReducedSuma = 0
+              var ReducedTax = 0
+              var ReducedSumaAll = 0
+              var ReducedTaxAll = 0
+              var ZeroSuma = 0
+
               if (druh == 0) {
                 s += '<CashVoucher>';
               } else if (druh == 1) {
@@ -665,14 +668,7 @@
                   s += `<ZeroTaxRateAmount>` + object[field].data.totalPrice + `</ZeroTaxRateAmount>
                         `
                 }
-              }
-              //empty array 
-              DPHsumar = []
-              BaseSuma = 0
-              ReducedSuma = 0
-              ZeroSuma = 0
-              ReducedTax = 0
-              BaseTax = 0
+              }             
 
               if (druh == 0) {
                 s += `</CashVoucher>
