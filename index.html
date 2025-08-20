@@ -387,6 +387,7 @@
               var ReducedSumaAll = 0
               var ReducedTaxAll = 0
               var ZeroSuma = 0
+              var TotalSuma = 0
 
               if (druh == 0) {
                 s += '<CashVoucher>';
@@ -537,6 +538,9 @@
                 ReducedTax = 0
 
                 if (item > 0) {
+                  //sumar cien s dph
+                  TotalSuma += item
+
                   s += `<SumValue>
                   <TaxPercent>` + index + `</TaxPercent>                  
                   <TaxCode>40</TaxCode>`
@@ -577,10 +581,8 @@
              
               s += `</SumValues>
                   `
-              //zaokruhlujeme blocky platene v hotovosti
-              let predZaokruhlenim = ( BaseSuma.toFixed(2) + ReducedSumaAll.toFixed(2) + ZeroSuma.toFixed(2)) * 100
-
-              if ((object[field].data.totalPrice*100) != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
+              
+              if ((object[field].data.totalPrice != TotalSuma) && (((TotalSuma*100) % 5)>0) && druh == 0){
                   s += `
                   <RoundingAmount>`
                   switch(predZaokruhlenim % 10) {
