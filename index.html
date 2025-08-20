@@ -452,11 +452,11 @@
                     s += `<TaxPercent>0.00</TaxPercent>`
 
                   }
-                  s += `<UnitPrice>`
+                  s += `<UnitPrice>`                    
                   if (polozky[item].quantity > 1) {
-                    s += (polozky[item].price / polozky[item].quantity / (1 + (polozky[item].vatRate / 100))).toFixed(3)
+                    s += (polozky[item].price / polozky[item].quantity / (1 + (polozky[item].vatRate / 100))).toFixed(2)
                   } else {
-                    s += (polozky[item].price / (1 + (polozky[item].vatRate / 100))).toFixed(3)
+                    s += (polozky[item].price / (1 + (polozky[item].vatRate / 100))).toFixed(2)
                   }
                   s += `</UnitPrice>
                                   <RowSumType>1</RowSumType>
@@ -606,13 +606,14 @@
                     s += `<ZeroTaxRateAmount>` + ZeroSuma.toFixed(2) + `</ZeroTaxRateAmount>
                       `
                   }
-                  if (object[field].data.taxBaseReduced != null) {
+             /*     if (object[field].data.taxBaseReduced != null) {
                     s += `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
                       `
                   } else {
                     s += `<ReducedTaxRateAmount>` + ReducedSuma.toFixed(2) + `</ReducedTaxRateAmount>
                       `
                   }
+                      */
                   if (object[field].data.taxBaseBasic != null) {
                     s += `<BaseTaxRateAmount>` + object[field].data.taxBaseBasic + `</BaseTaxRateAmount>
                       `
@@ -620,13 +621,14 @@
                     s += `<BaseTaxRateAmount>` + BaseSuma.toFixed(2) + `</BaseTaxRateAmount>
                       `
                   }
-                  if (object[field].data.vatAmountReduced != null) {
+                  /* if (object[field].data.vatAmountReduced != null) {
                     s += `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
                       `
                   } else {
                     s += `<ReducedTaxRateTax>` + ReducedTax.toFixed(2) + `</ReducedTaxRateTax>
                       `
                   }
+                  */
                   if (object[field].data.vatAmountBasic != null) {
                     s += `<BaseTaxRateTax>` + object[field].data.vatAmountBasic + `</BaseTaxRateTax>
                       `
@@ -792,6 +794,7 @@
       }
       $("#bdelmem").show();
     }
+//TODO: fixnut txt na konci a zmenit download sposob
 
     function download(filename, text) {
       var pom = document.createElement('a');
