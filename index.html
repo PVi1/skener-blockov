@@ -578,7 +578,7 @@
               s += `</SumValues>
                   `
               //zaokruhlujeme blocky platene v hotovosti
-              let predZaokruhlenim = ( BaseSuma + ReducedSumaAll + ZeroSuma).toFixed(2) * 100
+              let predZaokruhlenim = ( BaseSuma.toFixed(2) + ReducedSumaAll.toFixed(2) + ZeroSuma.toFixed(2)) * 100
 
               if ((object[field].data.totalPrice*100) != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
                   s += `
