@@ -585,7 +585,7 @@
               if ((object[field].data.totalPrice != TotalSuma) && (((TotalSuma*100) % 5)>0) && druh == 0){
                   s += `
                   <RoundingAmount>`
-                  switch(predZaokruhlenim % 10) {
+                  switch((TotalSuma*100) % 10) {
                     case 1:
                     case 6:
                       s += '-0.01'
