@@ -398,7 +398,7 @@
                  <IssueDate>` + getDate(object[field].data.issueDate) +
                 `</IssueDate>
                  <CurrencyCode>EUR</CurrencyCode>
-                 <ValuesWithTax>F</ValuesWithTax>
+                 <ValuesWithTax>T</ValuesWithTax>
                  `
            
               s +=
@@ -459,9 +459,9 @@
                   }
                   s += `<UnitPrice>`                    
                   if (polozky[item].quantity > 1) {
-                    s += (polozky[item].price / polozky[item].quantity / (1 + (polozky[item].vatRate / 100))).toFixed(2)
+                    s += (polozky[item].price / polozky[item].quantity ).toFixed(3)
                   } else {
-                    s += (polozky[item].price / (1 + (polozky[item].vatRate / 100))).toFixed(2)
+                    s += (polozky[item].price).toFixed(3)
                   }
                   s += `</UnitPrice>
                                   <RowSumType>1</RowSumType>
@@ -495,9 +495,9 @@
                   s += `<UnitPrice>`
 
                   if (item.quantity > 1) {
-                    s += (item.price / item.quantity / (1 + (item.vatRate / 100))).toFixed(3)
+                    s += (item.price / item.quantity).toFixed(3)
                   } else {
-                    s += (item.price / (1 + (item.vatRate / 100))).toFixed(3)
+                    s += (item.price).toFixed(3)
                   }
 
                   s += `</UnitPrice>
