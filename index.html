@@ -616,7 +616,7 @@
                     s += `<ReducedTaxRateAmount>` + object[field].data.taxBaseReduced + `</ReducedTaxRateAmount>
                       `
                   } else {
-                    s += `<ReducedTaxRateAmount>` + ReducedSuma.toFixed(2) + `</ReducedTaxRateAmount>
+                    s += `<ReducedTaxRateAmount>` + ReducedSumaAll.toFixed(2) + `</ReducedTaxRateAmount>
                       `
                   }
                       
@@ -631,7 +631,7 @@
                     s += `<ReducedTaxRateTax>` + object[field].data.vatAmountReduced + `</ReducedTaxRateTax>
                       `
                   } else {
-                    s += `<ReducedTaxRateTax>` + ReducedTax.toFixed(2) + `</ReducedTaxRateTax>
+                    s += `<ReducedTaxRateTax>` + ReducedTaxAll.toFixed(2) + `</ReducedTaxRateTax>
                       `
                   }
                   
