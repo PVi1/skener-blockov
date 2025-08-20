@@ -523,38 +523,10 @@
                 `
               }
 
-              //zaokruhlujeme blocky platene v hotovosti
-              let predZaokruhlenim = (object[field].data.taxBaseBasic*100) + (object[field].data.taxBaseReduced*100) + (object[field].data.freeTaxAmount*100) + (object[field].data.vatAmountBasic*100) + (object[field].data.vatAmountReduced*100)
-              if ((object[field].data.totalPrice*100) != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
-                  s += `</Items>
-                  <RoundingAmount>`
-                  switch(predZaokruhlenim % 10) {
-                    case 1:
-                    case 6:
-                      s += '-0.01'
-                      break;
-                    case 2:
-                    case 7:
-                        s += '-0.02'
-                      break;
-                    case 3:
-                    case 8:
-                        s += '0.02'
-                      break;
-                    case 4:
-                    case 9:
-                        s += '0.01'
-                      break;
-                  }
-                    s += `</RoundingAmount>`
-              }
-              else {
-                s += `</Items>
-                <RoundingAmount></RoundingAmount>
-                `
-              }
+              
               //sumar sadzieb DPH https://faq.mrp.cz/faqcz/obrazky/jkimage/mrpks_xml_2_0_doc_pk.txt CashVouchers/CashVoucher/SumValues/SumValue
-              s += `<SumValues>
+              s += `</Items>
+              <SumValues>
                 `
               
               DPHsumar.forEach(function(item, index) {               
@@ -602,6 +574,38 @@
              
               s += `</SumValues>
                   `
+              //zaokruhlujeme blocky platene v hotovosti
+              let predZaokruhlenim = ( BaseSuma + ReducedSumaAll + ZeroSuma).toFixed(2) * 100
+
+              if ((object[field].data.totalPrice*100) != predZaokruhlenim && (predZaokruhlenim % 5)>0 && druh == 0){
+                  s += `
+                  <RoundingAmount>`
+                  switch(predZaokruhlenim % 10) {
+                    case 1:
+                    case 6:
+                      s += '-0.01'
+                      break;
+                    case 2:
+                    case 7:
+                        s += '-0.02'
+                      break;
+                    case 3:
+                    case 8:
+                        s += '0.02'
+                      break;
+                    case 4:
+                    case 9:
+                        s += '0.01'
+                      break;
+                  }
+                    s += `</RoundingAmount>`
+              }
+              else {
+                s += `
+                <RoundingAmount></RoundingAmount>
+                `
+              }
+
                   if (object[field].data.type == "PD") {
                 if(cmpDPH == "1"){ 
                   //platitel dph
