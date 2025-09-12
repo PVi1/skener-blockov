@@ -388,9 +388,19 @@
               var ReducedTaxAll = 0
               var ZeroSuma = 0
               var TotalSuma = 0
+              var RoundingAmount = 0
 
               if (druh == 0) {
-                s += '<CashVoucher>';
+                s += `<CashVoucher>
+                  `
+                if (cmpDPH == 1){
+                  s += `<TaxCode>40</TaxCode>
+                  `
+                }
+                else {
+                  s += `<TaxCode>39</TaxCode>
+                  `
+                }
               } else if (druh == 1) {
                 s += '<Payable>'
               }
@@ -435,7 +445,7 @@
               }
               s += `</Company>
                 <Items>
-      `
+                `
               let polozky = object[field].data.items
               if (polozky && polozky.length == 1) {
                 for (let item in polozky) {
@@ -467,7 +477,8 @@
                   s += `</UnitPrice>
                                   <RowSumType>1</RowSumType>
                                   <RowType>1</RowType>
-                              </Item>`                  
+                              </Item>`
+                  TotalSuma += polozky[item].price                  
                 }
               } else if (polozky && polozky.length > 1) {
                 polozky.forEach(function(item) {
@@ -502,11 +513,11 @@
                   }
 
                   s += `</UnitPrice>
-                                  <RowSumType>1</RowSumType>
-                                  <RowType>1</RowType>
-                            </Item>
-                            `                 
-
+                        <RowSumType>1</RowSumType>
+                        <RowType>1</RowType>
+                        </Item>
+                        `                 
+                  TotalSuma += item.price 
                 })
               } else if (object[field].data.type == "UF") { //uhrada faktury
                 s += `
@@ -532,86 +543,116 @@
               s += `</Items>
               <SumValues>
                 `
-              
-              DPHsumar.forEach(function(item, index) {               
-                ReducedSuma = 0
-                ReducedTax = 0
+              //zaokruhlenie TotalSuma na dve desatinne miesta
+              TotalSuma = Math.round(parseFloat(TotalSuma) *100) /100              
+              if ((object[field].data.totalPrice != TotalSuma) && (((TotalSuma*100) % 5)>0) && druh == 0){
+                  
+                  switch(Math.round((TotalSuma*100) % 10)) {
+                    case 1:
+                    case 6:
+                      RoundingAmount = -0.01
+                      break;
+                    case 2:
+                    case 7:                      
+                      RoundingAmount = -0.02
+                      break;
+                    case 3:
+                    case 8:
+                      RoundingAmount = 0.02
+                      break;
+                    case 4:
+                    case 9:
+                      RoundingAmount = 0.01
+                      break;
+                  }                   
+              }
 
-                if (item > 0) {
-                  //sumar cien s dph
-                  TotalSuma += item
+              if( cmpDPH == "1" ){
 
-                  s += `<SumValue>
-                  <TaxPercent>` + index + `</TaxPercent>                  
-                  <TaxCode>40</TaxCode>`
+                DPHsumar.forEach(function(item, index) {               
+                  ReducedSuma = 0
+                  ReducedTax = 0
 
-                  if (index == 23){
-                    s += `<TaxType>1</TaxType>
+                  if (item > 0) {
+                    //sumar cien s dph
+                  
+                    s += `<SumValue>
+                    <TaxPercent>` + index + `</TaxPercent>                  
                     `
-                    BaseSuma += (item / (1 + (index / 100)))
-                    BaseTax += (BaseSuma * index / 100)
-                     s += `<Amount>` + BaseSuma.toFixed(2) + `</Amount>
-                     <Tax>` + BaseTax.toFixed(2) + `</Tax>
-                  <TaxApplied>` + BaseTax.toFixed(2) + `</TaxApplied>
-                  </SumValue>
-                  `
-                  }else if (index > 0 && index < 23) {
-                    s += `<TaxType>2</TaxType>
-                    `
-                    ReducedSuma = (item / (1 + (index / 100)))
-                    ReducedTax = (ReducedSuma * index / 100)
-                    ReducedSumaAll += ReducedSuma
-                    ReducedTaxAll += ReducedTax
-                      s += `<Amount>` + ReducedSuma.toFixed(2) + `</Amount>
-                      <Tax>` + ReducedTax.toFixed(2) + `</Tax>
-                  <TaxApplied>` + ReducedTax.toFixed(2) + `</TaxApplied>
-                  </SumValue>
-                  `
-                  }
-                  else {
-                    s += `<TaxType>3</TaxType>
-                    <Amount>` + item + `</Amount>
+
+                    if (index == 23){
+                      s += `<TaxCode>40</TaxCode>
+                      <TaxType>1</TaxType>
+                      `
+                      BaseSuma += (item / (1 + (index / 100)))
+                      BaseTax += (BaseSuma * index / 100)
+                      s += `<Amount>` + BaseSuma.toFixed(2) + `</Amount>
+                      <Tax>` + BaseTax.toFixed(2) + `</Tax>
+                    <TaxApplied>` + BaseTax.toFixed(2) + `</TaxApplied>
                     </SumValue>
                     `
-                    ZeroSuma += item
+                    }else if (index > 0 && index < 23) {
+                      s += `<TaxCode>40</TaxCode>
+                      <TaxType>2</TaxType>
+                      `
+                      ReducedSuma = (item / (1 + (index / 100)))
+                      ReducedTax = (ReducedSuma * index / 100)
+                      ReducedSumaAll += ReducedSuma
+                      ReducedTaxAll += ReducedTax
+                        s += `<Amount>` + ReducedSuma.toFixed(2) + `</Amount>
+                        <Tax>` + ReducedTax.toFixed(2) + `</Tax>
+                    <TaxApplied>` + ReducedTax.toFixed(2) + `</TaxApplied>
+                    </SumValue>
+                    `
+                    }
+                    else {
+                      s += `<TaxCode>39</TaxCode>
+                      <TaxType>3</TaxType>
+                      <Amount>` + item + `</Amount>
+                      </SumValue>
+                      `
+                      ZeroSuma += item
+                    }
+                  
                   }
-                 
-                }
-              })
+                })
+              }else {
+                //neplatca dph ma len 1 typ               
+                s += `<SumValue>
+                    <TaxPercent>0.00</TaxPercent>                  
+                    <TaxCode>39</TaxCode>  
+                    <TaxType>3</TaxType>
+                    <Amount>` + TotalSuma.toFixed(2) + `</Amount>
+                    </SumValue>
+                    `
+              }
+              //zaokruhlenie pre kazdeho
+             
+              if (RoundingAmount !=0){
+                 s += `<SumValue>
+                    <TaxPercent>0.00</TaxPercent>                  
+                    <TaxCode>39</TaxCode>  
+                    <TaxType>4</TaxType>
+                    <Amount>` + RoundingAmount + `</Amount>
+                    </SumValue>
+                    `                
+              }
              
               s += `</SumValues>
                   `
               
-              if ((object[field].data.totalPrice != TotalSuma) && (((TotalSuma*100) % 5)>0) && druh == 0){
-                  s += `
-                  <RoundingAmount>`
-                  switch((TotalSuma*100) % 10) {
-                    case 1:
-                    case 6:
-                      s += '-0.01'
-                      break;
-                    case 2:
-                    case 7:
-                        s += '-0.02'
-                      break;
-                    case 3:
-                    case 8:
-                        s += '0.02'
-                      break;
-                    case 4:
-                    case 9:
-                        s += '0.01'
-                      break;
-                  }
-                    s += `</RoundingAmount>`
-              }
+             if (RoundingAmount !=0){
+                s += `
+                    <RoundingAmount>` + RoundingAmount + `</RoundingAmount>
+                    `                  
+             }
               else {
                 s += `
                 <RoundingAmount></RoundingAmount>
                 `
               }
 
-                  if (object[field].data.type == "PD") {
+              if (object[field].data.type == "PD") {
                 if(cmpDPH == "1"){ 
                   //platitel dph
                   if (object[field].data.freeTaxAmount != null) {
@@ -656,10 +697,9 @@
                       `
                   }
                 }else {
-                    s += `<ZeroTaxRateAmount>0.00</ZeroTaxRateAmount>
+                    s += `<ZeroTaxRateAmount>` + TotalSuma + `</ZeroTaxRateAmount>
                     <ReducedTaxRateAmount>0.00</ReducedTaxRateAmount>
-                    <BaseTaxRateAmount>0.00</BaseTaxRateAmount>
-                    <RoundingAmount>` + object[field].data.totalPrice + `</RoundingAmount>
+                    <BaseTaxRateAmount>0.00</BaseTaxRateAmount>                   
                     <ReducedTaxRateTax>0.00</ReducedTaxRateTax>
                     <BaseTaxRateTax>0.00</BaseTaxRateTax>               
                     <TaxPointDate>` + getDate(object[field].data.issueDate) + `</TaxPointDate>     
